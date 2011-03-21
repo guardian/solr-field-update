@@ -64,3 +64,6 @@ not remove the record as for standard deletes. Add multiple `delete.field` param
 single request.
 
 Comma separated lists are also accepted for `delete.field` values.
+
+A merge by query is also available. Add `merge=true` and `merge.query=<query>` to the request and include a document
+as a standard add. This document is merged with all documents that match the given query.

@@ -56,6 +56,7 @@ class MergeUpdateRequestProcessor extends UpdateRequestProcessor {
     private final SolrIndexSearcher searcher;
     private final boolean overwriteMultivalues;
     private final List<String> deleteFields;
+    private final String mergeQuery;
 
     public MergeUpdateRequestProcessor(SolrQueryRequest req, UpdateRequestProcessor next) {
         super(next);
@@ -64,29 +65,52 @@ class MergeUpdateRequestProcessor extends UpdateRequestProcessor {
         this.searcher = req.getSearcher();
         this.overwriteMultivalues = req.getParams().getBool("overwriteMultivalues", true);
         this.deleteFields = MergeUtils.deleteFields(req);
+        this.mergeQuery = req.getParams().get("merge.query");
     }
 
     @Override
     public void processAdd(AddUpdateCommand cmd) throws IOException {
-        String id = cmd.getIndexedId(schema);
-        log.debug("MergeUpdateRequest: add " + id);
+        if (mergeQuery == null || mergeQuery.trim().equals("")) {
+            String id = cmd.getIndexedId(schema);
+            log.debug("MergeUpdateRequest: add " + id);
 
-        Searcher search = new Searcher(schema, searcher, log);
-        SolrDocument doc = search.findById(id);
+            Searcher search = new Searcher(schema, searcher, log);
+            SolrDocument doc = search.findById(id);
 
-        if (doc != null) {
-            if (log.isDebugEnabled()) {
-                log.debug("MergeUpdateRequest: Merging with existing document.");
+            if (doc != null) {
+                if (log.isDebugEnabled()) {
+                    log.debug("MergeUpdateRequest: Merging with existing document.");
+                }
+
+                cmd.solrDoc = MergeUtils.merge(cmd.getSolrInputDocument(), doc, schema, overwriteMultivalues);
+            } else {
+                if (log.isDebugEnabled()) {
+                    log.debug("MergeUpdateRequest: New insert.");
+                }
             }
 
-            cmd.solrDoc = MergeUtils.merge(cmd.getSolrInputDocument(), doc, schema, overwriteMultivalues);
+            super.processAdd(cmd);
+
         } else {
             if (log.isDebugEnabled()) {
-                log.debug("MergeUpdateRequest: New insert.");
+                log.debug("MergeUpdateRequest: add " + mergeQuery);
+                log.debug("MergeUpdateRequest: Merge into existing documents(%s)", mergeQuery);
+            }
+
+            Query q = QueryParsing.parseQuery(mergeQuery, schema);
+            DocIterator docs = searcher.getDocSet(q).iterator();
+
+            SolrInputDocument merge = MergeUtils.withoutId(cmd.getSolrInputDocument(), schema);
+
+            while (docs.hasNext()) {
+                Document luceneDoc = searcher.doc(docs.nextDoc());
+                SolrDocument doc = MergeUtils.toSolrDocument(luceneDoc, schema);
+                SolrInputDocument merged = MergeUtils.merge(merge, doc, schema, overwriteMultivalues);
+                log.info("MergeUpdateRequest: merged = " + merged);
+
+                super.processAdd(MergeUtils.addCommandFor(merged));
             }
         }
-
-        super.processAdd(cmd);
     }
 
     @Override

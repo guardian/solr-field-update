@@ -36,12 +36,28 @@ import java.util.List;
 
 public class MergeUtils {
 
-    public static SolrInputDocument merge(SolrInputDocument solrInputDocument, SolrDocument existing, IndexSchema schema, boolean overwriteMultivalues) {
-        SolrInputDocument merged = new SolrInputDocument();
+    private static SolrInputDocument copy(SolrInputDocument document) {
+        SolrInputDocument copy = new SolrInputDocument();
 
-        for (String name : existing.getFieldNames()) {
-            merged.addField(name, existing.getFieldValue(name));
+        for (String name : document.getFieldNames()) {
+            copy.addField(name, document.getFieldValue(name));
         }
+
+        return copy;
+    }
+
+    private static SolrInputDocument copy(SolrDocument document) {
+        SolrInputDocument copy = new SolrInputDocument();
+
+        for (String name : document.getFieldNames()) {
+            copy.addField(name, document.getFieldValue(name));
+        }
+
+        return copy;
+    }
+
+    public static SolrInputDocument merge(SolrInputDocument solrInputDocument, SolrDocument existing, IndexSchema schema, boolean overwriteMultivalues) {
+        SolrInputDocument merged = copy(existing);
 
         for (SolrInputField field : solrInputDocument) {
             String fieldName = field.getName();
@@ -59,12 +75,15 @@ public class MergeUtils {
         return merged;
     }
 
-    public static SolrInputDocument delete(List<String> deleteFields, SolrDocument existing) {
-        SolrInputDocument merged = new SolrInputDocument();
+    public static SolrInputDocument withoutId(SolrInputDocument document, IndexSchema schema) {
+        SolrInputDocument withoutId = copy(document);
+        withoutId.removeField(schema.getUniqueKeyField().getName());
 
-        for (String name : existing.getFieldNames()) {
-            merged.addField(name, existing.getFieldValue(name));
-        }
+        return withoutId;
+    }
+
+    public static SolrInputDocument delete(List<String> deleteFields, SolrDocument existing) {
+        SolrInputDocument merged = copy(existing);
 
         for (String name : deleteFields) {
             merged.removeField(name);
