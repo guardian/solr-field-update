@@ -106,7 +106,7 @@ class MergeUpdateRequestProcessor extends UpdateRequestProcessor {
                 Document luceneDoc = searcher.doc(docs.nextDoc());
                 SolrDocument doc = MergeUtils.toSolrDocument(luceneDoc, schema);
                 SolrInputDocument merged = MergeUtils.merge(merge, doc, schema, overwriteMultivalues);
-                log.info("MergeUpdateRequest: merged = " + merged);
+                log.debug("MergeUpdateRequest: merged = " + merged);
 
                 super.processAdd(MergeUtils.addCommandFor(merged));
             }
