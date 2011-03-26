@@ -94,7 +94,7 @@ class MergeUpdateRequestProcessor extends UpdateRequestProcessor {
         } else {
             if (log.isDebugEnabled()) {
                 log.debug("MergeUpdateRequest: add " + mergeQuery);
-                log.debug("MergeUpdateRequest: Merge into existing documents(%s)", mergeQuery);
+                log.debug(String.format("MergeUpdateRequest: Merge into existing documents(%s)", mergeQuery));
             }
 
             Query q = QueryParsing.parseQuery(mergeQuery, schema);
@@ -142,7 +142,7 @@ class MergeUpdateRequestProcessor extends UpdateRequestProcessor {
 
             if (log.isDebugEnabled()) {
                 log.debug("MergeUpdateRequest: delete " + query);
-                log.debug("MergeUpdateRequest: Delete from existing documents(%s)", query);
+                log.debug(String.format("MergeUpdateRequest: Delete from existing documents(%s)", query));
             }
 
             Query q = QueryParsing.parseQuery(query, schema);
