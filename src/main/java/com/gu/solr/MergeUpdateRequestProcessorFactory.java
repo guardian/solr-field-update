@@ -24,7 +24,7 @@ import org.apache.solr.common.SolrDocument;
 import org.apache.solr.common.SolrInputDocument;
 import org.apache.solr.core.SolrCore;
 import org.apache.solr.request.SolrQueryRequest;
-import org.apache.solr.request.SolrQueryResponse;
+import org.apache.solr.response.SolrQueryResponse;
 import org.apache.solr.schema.IndexSchema;
 import org.apache.solr.search.DocIterator;
 import org.apache.solr.search.QueryParsing;
@@ -41,7 +41,7 @@ import java.util.List;
 
 public class MergeUpdateRequestProcessorFactory extends UpdateRequestProcessorFactory {
     @Override
-    public UpdateRequestProcessor getInstance(SolrQueryRequest req, SolrQueryResponse rsp, UpdateRequestProcessor next) {
+    public UpdateRequestProcessor getInstance(SolrQueryRequest req, SolrQueryResponse response, UpdateRequestProcessor next) {
         if (req.getParams().getBool("merge", false)) {
             return new MergeUpdateRequestProcessor(req, next);
         }

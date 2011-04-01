@@ -17,10 +17,19 @@
         <dependency>
             <groupId>org.apache.solr</groupId>
             <artifactId>solr-core</artifactId>
-            <version>1.4.1</version>
+            <version>3.1.0</version>
             <scope>provided</scope>
         </dependency>
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>guardianGithub</id>
+            <name>Guardian Github</name>
+            <url>http://guardian.github.com/maven</url>
+            <layout>default</layout>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
