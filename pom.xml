@@ -26,7 +26,7 @@
         <repository>
             <id>guardianGithub</id>
             <name>Guardian Github</name>
-            <url>http://guardian.github.com/maven</url>
+            <url>https://guardian.github.com/maven</url>
             <layout>default</layout>
         </repository>
     </repositories>
